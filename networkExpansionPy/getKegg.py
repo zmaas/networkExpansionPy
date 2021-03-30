@@ -37,7 +37,7 @@ import requests
 from tqdm import tqdm
 
 # Output file path, you should change this
-out_file = "/hdd/kegg_rxns.tab"
+out_file = "../networkExpansionPy/assets/iqbio/kegg_rxns.tab"
 
 
 def grouper(iterable, n, fillvalue=None):

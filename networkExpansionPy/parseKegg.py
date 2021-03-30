@@ -37,9 +37,9 @@ import itertools as it
 import networkx as nx
 import matplotlib.pyplot as plt
 
-in_file = "/hdd/kegg_rxns.tab"
-out_file = "/hdd/kegg_rxns.dot"
-out_gmlfile = "/hdd/kegg_rxns.gml"
+in_file = "../networkExpansionPy/assets/iqbio/kegg_rxns.tab"
+out_file = "../networkExpansionPy/assets/iqbio/kegg_rxns.dot"
+out_gmlfile = "../networkExpansionPy/assets/iqbio/kegg_rxns.gml"
 
 
 def get_rxn_pairs(in_file=in_file):
