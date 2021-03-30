@@ -15,16 +15,24 @@ def netExp(R,P,x,b):
     k = np.sum(x);
     k0 = 0;
     n_reactions = np.size(R,1)
+def netExp(R, P, x, b):
+    k = np.sum(x)
+    k0 = 0
+    n_reactions = np.size(R, 1)
     y = csr_matrix(np.zeros(n_reactions))
+    x_list = [x]
+    y_list = [y]
     while k > k0:
-        k0 = np.sum(x);
-        y = (np.dot(R.transpose(),x) == b);
-        y = y.astype('int');
-        x_n = np.dot(P,y) + x;
-        x_n = x_n.astype('bool');
-        x = x_n.astype('int');
-        k = np.sum(x);
-    return x,y
+        k0 = np.sum(x)
+        y = np.dot(R.transpose(), x) == b
+        y = y.astype("int")
+        x_n = np.dot(P, y) + x
+        x_n = x_n.astype("bool")
+        x = x_n.astype("int")
+        k = np.sum(x)
+        x_list.append(x)
+        y_list.append(y)
+    return x, y, x_list, y_list
 
 # define a new network expansion, s.t. stopping criteria is now no new compounds or reactions can be added at subsequent iterations
 def netExp_cr(R,P,x,b):
@@ -338,25 +346,44 @@ class GlobalMetabolicNetwork:
 
         x0 = csr_matrix(x0)
         x0 = x0.transpose()
-        if algorithm.lower() == 'naive':
-            x,y = netExp(R,P,x0,b)
-        elif algorithm.lower() == 'cr':
-            x,y = netExp_cr(R,P,x0,b)
+        if algorithm.lower() == "naive":
+            x, y, x_list, y_list = netExp(R, P, x0, b)
+        elif algorithm.lower() == "cr":
+            x, y = netExp_cr(R, P, x0, b)
         else:
-            raise ValueError('algorithm needs to be naive (compound stopping criteria) or cr (reaction/compound stopping criteria)')
-        
+            raise ValueError(
+                "algorithm needs to be naive (compound stopping criteria) or cr (reaction/compound stopping criteria)"
+            )
+
         # convert to list of metabolite ids and reaction ids
         if x.toarray().sum() > 0:
             cidx = np.nonzero(x.toarray().T[0])[0]
             compounds = [self.idx_to_cid[i] for i in cidx]
         else:
             compounds = []
-            
+
         if y.toarray().sum() > 0:
             ridx = np.nonzero(y.toarray().T[0])[0]
             reactions = [self.idx_to_rid[i] for i in ridx]
         else:
-            reactions = [];
-            
-        return compounds,reactions
+            reactions = []
 
+        compounds_list = []
+        for sub_x in x_list:
+            if sub_x.toarray().sum() > 0:
+                cid_sub_x = np.nonzero(sub_x.toarray().T[0])[0]
+                sub_compounds = [self.idx_to_cid[i] for i in cid_sub_x]
+            else:
+                sub_compounds = []
+            compounds_list.append(sub_compounds)
+
+        reactions_list = []
+        for sub_x in x_list:
+            if sub_x.toarray().sum() > 0:
+                cid_sub_x = np.nonzero(sub_x.toarray().T[0])[0]
+                sub_reactions = [self.id_to_cid[i] for i in cid_sub_x]
+            else:
+                sub_reactions = []
+            reactions_list.append(sub_reactions)
+
+        return compounds, reactions, compounds_list, reactions_list
