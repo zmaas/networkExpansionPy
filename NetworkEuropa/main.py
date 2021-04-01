@@ -22,21 +22,21 @@ import numpy as np
 metabolism = ne.GlobalMetabolicNetwork()
 
 # Split reversible reactions in two reactions (One forward and one backward)
-metabolism.convertToIrreversible()
+#metabolism.convertToIrreversible()
 
 # define seed compounds
 # dataFrame that incldues CID and Name of the Seed components
-seed = pd.read_csv('SeedEuropa.csv')
+#seed = pd.read_csv('SeedEuropa.csv')
 
 # Sets are used to store multiple items in a single variable
 # https://www.w3schools.com/python/python_sets.asp
 # Store the seedset
-seedset = set(seed['CID'].tolist())
+#seedset = set(seed['CID'].tolist())
 
 # Run the expantion of the metabolism
 # Returns the compounds and reactions
-ne_cpds,ne_rxns = metabolism.expand(seedset)
+#ne_cpds,ne_rxns = metabolism.expand(seedset)
 
 # Give the number of compounds and reactions
-len(ne_cpds)
-len(seedset)
+#len(ne_cpds)
+#len(seedset)

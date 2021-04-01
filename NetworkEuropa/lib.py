@@ -1,22 +1,42 @@
+# Class scipy.sparse.csr_matrix
+# (https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_matrix.html#scipy.sparse.csr_matrix)
+# A special format for matricies that mostly contaions 0s
+# Sparse data are a data sets that mostly contains 0s
+# CSR = Compressed Sparse Row
+# Tutorial: https://www.w3schools.com/python/scipy_sparse_data.asp
 from scipy.sparse import csr_matrix
+
+# Python library to work with arrays
+# https://www.w3schools.com/python/numpy_intro.asp
+# In Python we have lists that serve the purpose of arrays, but they are slow to process
+# NumPy aims to provide an array object that is up to 50x faster than traditional Python lists
 import numpy as np
+
+# Open source data analysis and manipulation tool
+# https://pandas.pydata.org/pandas-docs/stable/user_guide/10min.html
 import pandas as pd
-#import ray
-from random import sample
+
+# Python package that helps interating with your operating system
 import os
+
+# Python package to work with JSON data. JSON is a syntax for storing and exchanging data, it is
+# text, written with JavaScript object notation.
 import json
+
+# Package that adds copy functions to python. Python usually uses references, but
+# sometimes real copies are necessary to edit one copy without changing the other
 from copy import copy, deepcopy
 
-# define asset path
+
+# Define the asset path
+# The first line gets the path of this file itself and splits the path into head and tail.
+# Tail is the last named component (here: lib.py) head is the rest.
 asset_path,filename = os.path.split(os.path.abspath(__file__))
+# The asset path is defined by using the head of the previous function and adding /asset
 asset_path = asset_path + '/assets'
 
-# Described in the method section of the paper
-# Inputs:
-# R is the reaction matrix
-# P is the product matrix
-# x is a vector
-# b is a vector
+# Algorithm that runs the network expansion. More information can be found in the method
+# section of Josh's paper or in our notes document: https://docs.google.com/document/d/17I7lOJJPZ8XeVjlQ45GArG3s_Yey-CnGIgjZFpHG0Os/edit
 def netExp(R,P,x,b):
     k = np.sum(x);
     k0 = 0;
@@ -32,7 +52,8 @@ def netExp(R,P,x,b):
         k = np.sum(x);
     return x,y
 
-# define a new network expansion, s.t. stopping criteria is now no new compounds or reactions can be added at subsequent iterations
+# Algorithm that runs the network expansion, here the stopping criteria is not only that no new compounds are added,
+# but also that no new reactions are added. (Another counter l is added to keep track of reactions)
 def netExp_cr(R,P,x,b):
     k = np.sum(x);
     k0 = 0;
@@ -54,8 +75,12 @@ def netExp_cr(R,P,x,b):
     return x,y
 
 
+# Algorithm that runs the network expansion with no new compounds as stopping criteria
+# Here, lists are defined and after each iteration, x and y is added to the list
+# List items are ordered, changeable, and allow duplicate values.
 def netExp_trace(R,P,x,b):
 
+    # Define lists
     X = []
     Y = []
 
@@ -78,7 +103,7 @@ def netExp_trace(R,P,x,b):
         Y.append(y)
     return X,Y
 
-
+# ???
 def parse_reaction_trace(reaction_trace,network):
     rxns_list = []
     for i in range(1,len(reaction_trace)):
@@ -91,6 +116,7 @@ def parse_reaction_trace(reaction_trace,network):
     return rxns_list
 
 
+# ???
 def isRxnCoenzymeCoupled(rxn,cosubstrate,coproduct):
     g = rxn[rxn.cid.isin([cosubstrate,coproduct])]
     out = False
@@ -99,6 +125,8 @@ def isRxnCoenzymeCoupled(rxn,cosubstrate,coproduct):
             out = True
     return out
 
+
+# ???
 def load_ecg_network(ecg):
     network_list = []
     consistent_rids = []
@@ -113,8 +141,11 @@ def load_ecg_network(ecg):
             consistent_rids.append(rid)
     return pd.DataFrame(network_list,columns=("cid","rn","s")), pd.DataFrame(consistent_rids,columns=["rn"])
 
+
+# Class that defines the Network
 class GlobalMetabolicNetwork:
 
+    # Gets called when a class object is initialized
     def __init__(self,ecg_json=None):
         # load the data
         # default is KEGG/network_full.csv
