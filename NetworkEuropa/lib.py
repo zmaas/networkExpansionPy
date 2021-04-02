@@ -142,14 +142,15 @@ def load_ecg_network(ecg):
     return pd.DataFrame(network_list,columns=("cid","rn","s")), pd.DataFrame(consistent_rids,columns=["rn"])
 
 
-# Class that defines the Network
+# The class the defines the characteristics of the metabolic network
 class GlobalMetabolicNetwork:
 
-    # Gets called when a class object is initialized
+    # The init function gets called when a class object is initialized
+    # the function checks if a databse in json format is given, if not it loads
+    # the /KEGG/network_full.csv' as default. It also loads /compounds/cpds.txt'
+    # for the compounds and /reaction_free_energy/kegg_reactions_CC_ph7.0.csv'
+    # for the thermodynamics
     def __init__(self,ecg_json=None):
-        # load the data
-        # default is KEGG/network_full.csv
-        # Is that what Zach got ?
 
         if ecg_json == None:
             network = pd.read_csv(asset_path + '/KEGG/network_full.csv')
@@ -160,7 +161,7 @@ class GlobalMetabolicNetwork:
             self.compounds = cpds ## Includes many compounds without reactions
             self.ecg = None
         else:
-        # Otherwise use specific file provided
+        # If other network is specified use the other network instead
             with open(ecg_json) as f:
                 ecg = json.load(f)
             network, consistent_rxns = load_ecg_network(ecg)
@@ -169,7 +170,7 @@ class GlobalMetabolicNetwork:
             self.consistent_rxns = consistent_rxns
             self.compounds = pd.DataFrame(self.network["cid"].unique(),columns=["cid"]) ## Only includes compounds with reactions
 
-        # Set attributes
+        # Set attributes of the class (Temp is initialized to 25C)
         self.temperature = 25
         self.seedSet = None
         self.rid_to_idx = None
@@ -178,9 +179,13 @@ class GlobalMetabolicNetwork:
         self.idx_to_cid = None
         self.S = None
 
+    # Function that uses the copy library and returns a true copy of the class object
+    # (Not just a reference)
     def copy(self):
         return deepcopy(self)
 
+    # Function to set the pH of the network. If no file is specifeid it uses '/reaction_free_energy/kegg_reactions_CC_ph'
+    # by default
     def set_ph(self,pH):
         if ~(type(pH) == str):
             pH = str(pH)
@@ -196,6 +201,7 @@ class GlobalMetabolicNetwork:
             except:
                 raise ValueError("Try another pH, that one appears not to be in the ecg json")
 
+    # ???
     def load_ecg_thermo(self,ph=9):
         thermo_list = []
         for rid,v in self.ecg["reactions"].items():
@@ -227,7 +233,8 @@ class GlobalMetabolicNetwork:
 
         return pd.DataFrame(thermo_list, columns = ("!MiriamID::urn:miriam:kegg.reaction","!dG0_prime (kJ/mol)","!sigma[dG0] (kJ/mol)","!pH","!I (mM)","!T (Kelvin)","!Note"))
 
-
+    # This function removes reactions that produce new elements by checking if the elements in
+    # the reaction and products are the same
     def pruneInconsistentReactions(self):
         # remove reactions with qualitatively different sets of elements in reactions and products
         if self.ecg==None:
@@ -236,15 +243,20 @@ class GlobalMetabolicNetwork:
         else:
             self.network = self.network[self.network.rn.isin(self.consistent_rxns.rn.tolist())]
 
+    # This funciton removes reactions with inconsistent stoichiometries by comparing
+    # the network to '/reaction_sets/reactions_balanced.csv'
     def pruneUnbalancedReactions(self):
         # only keep reactions that are elementally balanced
         balanced = pd.read_csv(asset_path + '/reaction_sets/reactions_balanced.csv')
         self.network = self.network[self.network.rn.isin(balanced.rn.tolist())]
 
+    # This function creates a subnetwork of the given network by comparing and only keeping
+    # elements that are specified in the given list
     def subnetwork(self,rxns):
         # only keep reactions that are in list
         self.network = self.network[self.network.rn.isin(rxns)]
 
+    # This function replaces NAD/NADP/FAD with generic coenzymes
     def addGenericCoenzymes(self):
         replace_metabolites = {'C00003': 'Generic_oxidant', 'C00004': 'Generic_reductant', 'C00006': 'Generic_oxidant',  'C00005': 'Generic_reductant','C00016': 'Generic_oxidant','C01352':'Generic_reductant'}
         coenzyme_pairs = {}
@@ -272,6 +284,9 @@ class GlobalMetabolicNetwork:
         self.thermo = pd.concat([self.thermo,new_thermo],axis=0)
 
 
+    # This function converts reversible reactions in irreversible reactions by
+    # copying the network and multiplying one copy by -1 and labeling the copies
+    # forward and reverse
     def convertToIrreversible(self):
         # Split reversible reactions into one forward and one backward reaction
         # copy the network
@@ -287,11 +302,15 @@ class GlobalMetabolicNetwork:
         net = net.set_index(['cid','rn','direction']).reset_index()
         self.network = net
 
+    # This function sets the upper and lower bounds of the metabolits. By default
+    # the upper bound is set to 1e-1 und the lower bound to 1e-6
     def setMetaboliteBounds(self,ub = 1e-1,lb = 1e-6):
 
         self.network['ub'] = ub
         self.network['lb'] = lb
 
+    # This function calcualtes the effective delta G of each reaction and drops reactions
+    # that are thermodynamical infeasable
     def pruneThermodynamicallyInfeasibleReactions(self,keepnan = False):
         fixed_mets = ['C00001','C00080']
 
@@ -326,6 +345,9 @@ class GlobalMetabolicNetwork:
         res = res.drop('effDeltaG',axis=1)
         self.network = res.join(self.network.set_index(['rn','direction'])).reset_index()
 
+
+    # This function initializes the vector x. If there are n metabolits x has the
+    # length of n. If reactant i is present xi is one otherwise it is 0
     def initialize_metabolite_vector(self,seedSet):
         if seedSet is None:
             print('No seed set')
@@ -335,6 +357,10 @@ class GlobalMetabolicNetwork:
                 x0[self.cid_to_idx[x]] = 1
             return x0
 
+    # This function creates dictionaries to store reactions. Dictionaries are used
+    # to store data values in key:value pairs. Here doubles of (rn,direction) are
+    # created and put into a set. Those sets are added to the dictionaries with
+    # the key idx
     def create_reaction_dicts(self):
         # Create doubles of (rn,direction) and put them in a set
         rids = set(zip(self.network["rn"],self.network["direction"]))
@@ -347,6 +373,8 @@ class GlobalMetabolicNetwork:
 
         return rid_to_idx, idx_to_rid
 
+    # This function works like create_reaction_dicts(self). It creates dictionaries
+    # to store compounds with a key (idx)
     def create_compound_dicts(self):
         cids = set(self.network["cid"])
         # Initialize dictionaries
@@ -358,7 +386,9 @@ class GlobalMetabolicNetwork:
 
         return cid_to_idx, idx_to_cid
 
-    def create_S_from_irreversible_network(self):
+     # This function creates a matrix S that contains the compound id, reaction,
+     # direction, and stoichiometrie of a metabolite
+     def create_S_from_irreversible_network(self):
 
         S = np.zeros([len(self.cid_to_idx),len(self.rid_to_idx)])
 
@@ -367,6 +397,11 @@ class GlobalMetabolicNetwork:
 
         return S
 
+    # The network expanation algorithm that utilizes the netExp() function at the beginng of the
+    # library. The function's inputs are the seedSet and the algorithm specification, specifying
+    # if the normal or reaction and compound restricted algorithm should be ran. The function's
+    # output are two lists one containing the final compounds and one containing the final reactions
+    # of the expanded network.
     def expand(self,seedSet,algorithm='naive'):
         # constructre network from skinny table and create matricies for NE algorithm
         # if (self.rid_to_idx is None) or (self.idx_to_rid is None):
