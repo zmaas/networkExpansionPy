@@ -82,4 +82,10 @@ This will return 4 variables:
 - A list of reactions in the final expanded set
 - A list of lists of compounds at each step in the expansion
 - A list of lists of reactions at each step in the expansion
+
 These can then be used for later analysis and visualization.
+
+To check for functionality of the example expansions included, run the following tests:
+```
+bash expansion_functional_tests.sh
+```
