@@ -1,10 +1,9 @@
 from scipy.sparse import csr_matrix
 import numpy as np
 import pandas as pd
-<<<<<<< HEAD
-=======
+
 #import ray
->>>>>>> Lukas
+
 from random import sample
 import os
 import json
@@ -374,13 +373,10 @@ class GlobalMetabolicNetwork:
         elif algorithm.lower() == "cr":
             x, y = netExp_cr(R, P, x0, b)
         else:
-<<<<<<< HEAD
             raise ValueError(
                 "algorithm needs to be naive (compound stopping criteria) or cr (reaction/compound stopping criteria)"
             )
-=======
             raise ValueError('algorithm needs to be naive (compound stopping criteria) or cr (reaction/compound stopping criteria)')
->>>>>>> Lukas
 
         # convert to list of metabolite ids and reaction ids
         if x.toarray().sum() > 0:
@@ -393,7 +389,6 @@ class GlobalMetabolicNetwork:
             ridx = np.nonzero(y.toarray().T[0])[0]
             reactions = [self.idx_to_rid[i] for i in ridx]
         else:
-<<<<<<< HEAD
             reactions = []
 
         compounds_list = []
@@ -415,8 +410,7 @@ class GlobalMetabolicNetwork:
             reactions_list.append(sub_reactions)
 
         return compounds, reactions, compounds_list, reactions_list
-=======
-            reactions = [];
+        reactions = [];
 
         return compounds,reactions
->>>>>>> Lukas
+
