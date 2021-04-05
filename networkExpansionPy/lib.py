@@ -1,7 +1,6 @@
 from scipy.sparse import csr_matrix
 import numpy as np
 import pandas as pd
-import ray
 from random import sample
 import os
 import json
@@ -381,7 +380,7 @@ class GlobalMetabolicNetwork:
         for sub_x in x_list:
             if sub_x.toarray().sum() > 0:
                 cid_sub_x = np.nonzero(sub_x.toarray().T[0])[0]
-                sub_reactions = [self.id_to_cid[i] for i in cid_sub_x]
+                sub_reactions = [self.idx_to_rid[i] for i in cid_sub_x]
             else:
                 sub_reactions = []
             reactions_list.append(sub_reactions)
