@@ -30,7 +30,7 @@ len(metabolism.network.cid.unique().tolist())
 cpds = pd.read_csv("../networkExpansionPy/assets/compounds/seeds_minimal.csv")
 cpds["CID"] = cpds["CID"].apply(lambda x: x.strip())
 seedset = set(cpds["CID"].tolist())
-ne_cpds, ne_rxns = metabolism.expand(seedset)
+ne_cpds, ne_rxns, ne_cpds_list, ne_rxns_list = metabolism.expand(seedset)
 rxn_pairs, _ = pk.get_rxn_pairs()
 
 edges = set()
@@ -40,7 +40,7 @@ for rxn in ne_rxns:
     except KeyError:
         print(f"Reaction {rxn[0]} not found")
 
-with open("/hdd/compounds.csv") as cpds_file_handle:
+with open("../networkExpansionPy/assets/iqbio/compounds.csv") as cpds_file_handle:
     lines = list(cpds_file_handle.readlines())
     cpd_dict = {
         cpd: name
@@ -51,9 +51,9 @@ with open("/hdd/compounds.csv") as cpds_file_handle:
 
 edges_renamed = [(cpd_dict[x], cpd_dict[y]) for x, y in edges]
 
-G = nx.Graph()
-G.add_edges_from(edges_renamed)
-nx.drawing.nx_agraph.write_dot(G, "/hdd/minimal.dot")
+# G = nx.Graph()
+# G.add_edges_from(edges_renamed)
+# nx.drawing.nx_agraph.write_dot(G, "../networkExpansionPy/assets/iqbio/compounds.csv")
 
 web = Web(edges_renamed)
 web.show()
