@@ -10,12 +10,14 @@
 test -e ssshtest || wget -q https://raw.githubusercontent.com/ryanlayer/ssshtest/master/ssshtest
 . ssshtest
 
-run test_in_stdout python -c "print ('example assert_in_stdout success')"
+run test_example python -c "print ('example assert_in_stdout success')"
 assert_in_stdout "example"
 
-run test_europa python examples/expand_europa.py
-assert_no_stderr
-assert_in_stdout "SparseEfficiencyWarning: Comparing sparse matrices using == is inefficient, try using != instead.
-  x, y, x_list, y_list = netExp(R, P, x0, b)"
+run test_europa python expand_europa.py
 assert_exit_code 0
-# assert_equal 'Data1.csv' $( ls 'Data1.csv' )
+
+run test_minimal python expand_minimal.py
+assert_exit_code 0
+
+run test_metals python expand_metals.py
+assert_exit_code 0
