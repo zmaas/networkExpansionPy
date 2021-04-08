@@ -3,6 +3,7 @@ import networkExpansionPy.parseKegg as pk
 import pandas as pd
 import networkx as nx
 from webweb import Web
+import numpy as np
 
 metabolism = ne.GlobalMetabolicNetwork()
 metabolism.pruneUnbalancedReactions()
@@ -57,3 +58,6 @@ edges_renamed = [(cpd_dict[x], cpd_dict[y]) for x, y in edges]
 
 web = Web(edges_renamed)
 web.show()
+
+
+print('Total compounds: {} Total reactions: {}'.format(np.size(ne_cpds), np.size(ne_rxns)/2))
