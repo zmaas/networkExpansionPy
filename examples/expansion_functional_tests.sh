@@ -7,7 +7,7 @@
 # This test relies on Ryan Layer's stupid simple ba(sh) testing found at:
 # https://github.com/ryanlayer/ssshtest
 
-test -e ssshtest || wget -q https://raw.githubusercontent.com/ryanlayer/ssshtest/master/ssshtest
+curl -o sshtest https://raw.githubusercontent.com/ryanlayer/ssshtest/master/ssshtest
 . ssshtest
 
 run test_example python -c "print ('example assert_in_stdout success')"
@@ -16,7 +16,6 @@ assert_in_stdout "example"
 run test_minimal python expand_minimal.py
 assert_exit_code 0
 assert_in_stdout "Total compounds: 29 Total reactions: 54"
-
 
 run test_metals python expand_metals.py
 assert_exit_code 0
