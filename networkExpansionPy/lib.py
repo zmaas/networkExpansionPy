@@ -1,7 +1,6 @@
 from scipy.sparse import csr_matrix
 import numpy as np
 import pandas as pd
-#import ray
 from random import sample
 import os
 import json
@@ -11,26 +10,28 @@ from copy import copy, deepcopy
 asset_path,filename = os.path.split(os.path.abspath(__file__))
 asset_path = asset_path + '/assets'
 
-# Described in the method section of the paper
-# Inputs:
-# R is the reaction matrix
-# P is the product matrix
-# x is a vector
-# b is a vector
 def netExp(R,P,x,b):
     k = np.sum(x);
     k0 = 0;
     n_reactions = np.size(R,1)
+def netExp(R, P, x, b):
+    k = np.sum(x)
+    k0 = 0
+    n_reactions = np.size(R, 1)
     y = csr_matrix(np.zeros(n_reactions))
+    x_list = [x]
+    y_list = [y]
     while k > k0:
-        k0 = np.sum(x);
-        y = (np.dot(R.transpose(),x) == b);
-        y = y.astype('int');
-        x_n = np.dot(P,y) + x;
-        x_n = x_n.astype('bool');
-        x = x_n.astype('int');
-        k = np.sum(x);
-    return x,y
+        k0 = np.sum(x)
+        y = np.dot(R.transpose(), x) == b
+        y = y.astype("int")
+        x_n = np.dot(P, y) + x
+        x_n = x_n.astype("bool")
+        x = x_n.astype("int")
+        k = np.sum(x)
+        x_list.append(x)
+        y_list.append(y)
+    return x, y, x_list, y_list
 
 # define a new network expansion, s.t. stopping criteria is now no new compounds or reactions can be added at subsequent iterations
 def netExp_cr(R,P,x,b):
@@ -117,9 +118,6 @@ class GlobalMetabolicNetwork:
 
     def __init__(self,ecg_json=None):
         # load the data
-        # default is KEGG/network_full.csv
-        # Is that what Zach got ?
-
         if ecg_json == None:
             network = pd.read_csv(asset_path + '/KEGG/network_full.csv')
             cpds = pd.read_csv(asset_path +'/compounds/cpds.txt',sep='\t')
@@ -129,7 +127,6 @@ class GlobalMetabolicNetwork:
             self.compounds = cpds ## Includes many compounds without reactions
             self.ecg = None
         else:
-        # Otherwise use specific file provided
             with open(ecg_json) as f:
                 ecg = json.load(f)
             network, consistent_rxns = load_ecg_network(ecg)
@@ -138,7 +135,6 @@ class GlobalMetabolicNetwork:
             self.consistent_rxns = consistent_rxns
             self.compounds = pd.DataFrame(self.network["cid"].unique(),columns=["cid"]) ## Only includes compounds with reactions
 
-        # Set attributes
         self.temperature = 25
         self.seedSet = None
         self.rid_to_idx = None
@@ -242,16 +238,11 @@ class GlobalMetabolicNetwork:
 
 
     def convertToIrreversible(self):
-        # Split reversible reactions into one forward and one backward reaction
-        # copy the network
         nf = self.network.copy()
         nb = self.network.copy()
-
         nf['direction'] = 'forward'
         nb['direction'] = 'reverse'
         nb['s'] = -nb['s']
-
-        # Concatenate nf,nb
         net = pd.concat([nf,nb],axis=0)
         net = net.set_index(['cid','rn','direction']).reset_index()
         self.network = net
@@ -305,9 +296,7 @@ class GlobalMetabolicNetwork:
             return x0
 
     def create_reaction_dicts(self):
-        # Create doubles of (rn,direction) and put them in a set
         rids = set(zip(self.network["rn"],self.network["direction"]))
-        # Initialize dictionaries
         rid_to_idx = dict()
         idx_to_rid = dict()
         for v, k in enumerate(rids):
@@ -318,7 +307,6 @@ class GlobalMetabolicNetwork:
 
     def create_compound_dicts(self):
         cids = set(self.network["cid"])
-        # Initialize dictionaries
         cid_to_idx = dict()
         idx_to_cid = dict()
         for v, k in enumerate(cids):
@@ -344,7 +332,6 @@ class GlobalMetabolicNetwork:
         self.cid_to_idx, self.idx_to_cid = self.create_compound_dicts()
         # if self.S is None:
         self.S = self.create_S_from_irreversible_network()
-
         x0 = self.initialize_metabolite_vector(seedSet)
         R = (self.S < 0)*1
         P = (self.S > 0)*1
@@ -358,12 +345,14 @@ class GlobalMetabolicNetwork:
 
         x0 = csr_matrix(x0)
         x0 = x0.transpose()
-        if algorithm.lower() == 'naive':
-            x,y = netExp(R,P,x0,b)
-        elif algorithm.lower() == 'cr':
-            x,y = netExp_cr(R,P,x0,b)
+        if algorithm.lower() == "naive":
+            x, y, x_list, y_list = netExp(R, P, x0, b)
+        elif algorithm.lower() == "cr":
+            x, y = netExp_cr(R, P, x0, b)
         else:
-            raise ValueError('algorithm needs to be naive (compound stopping criteria) or cr (reaction/compound stopping criteria)')
+            raise ValueError(
+                "algorithm needs to be naive (compound stopping criteria) or cr (reaction/compound stopping criteria)"
+            )
 
         # convert to list of metabolite ids and reaction ids
         if x.toarray().sum() > 0:
@@ -376,6 +365,37 @@ class GlobalMetabolicNetwork:
             ridx = np.nonzero(y.toarray().T[0])[0]
             reactions = [self.idx_to_rid[i] for i in ridx]
         else:
-            reactions = [];
+            reactions = []
 
-        return compounds,reactions
+        compounds_list = []
+        for sub_x in x_list:
+            if sub_x.toarray().sum() > 0:
+                cid_sub_x = np.nonzero(sub_x.toarray().T[0])[0]
+                sub_compounds = [self.idx_to_cid[i] for i in cid_sub_x]
+            else:
+                sub_compounds = []
+            compounds_list.append(sub_compounds)
+
+        reactions_list = []
+        for sub_x in x_list:
+            if sub_x.toarray().sum() > 0:
+                cid_sub_x = np.nonzero(sub_x.toarray().T[0])[0]
+                sub_reactions = [self.idx_to_rid[i] for i in cid_sub_x]
+            else:
+                sub_reactions = []
+            reactions_list.append(sub_reactions)
+
+        return compounds, reactions, compounds_list, reactions_list
+
+    def init_pruning(self,pH='7.0', ub=1e-1, lb=1e-6, keepnan=False):
+        self.pruneUnbalancedReactions()
+        # Remove reactions that unrealistically produce new elements
+        self.pruneInconsistentReactions()
+        # Look at a pH of 7 (must be between 5 and 9, 0.5 increments)
+        self.set_ph(pH)
+        # Upper and lower metabolite bounds
+        self.setMetaboliteBounds(ub, lb)
+        # Irreversible required for thermodynamic considerations
+        self.convertToIrreversible()
+        # Remove infeasible reactions
+        self.pruneThermodynamicallyInfeasibleReactions(keepnan)
