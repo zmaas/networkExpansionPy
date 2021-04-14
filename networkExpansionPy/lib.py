@@ -1,7 +1,6 @@
 from scipy.sparse import csr_matrix
 import numpy as np
 import pandas as pd
-import ray
 from random import sample
 import os
 import json
@@ -324,8 +323,8 @@ class GlobalMetabolicNetwork:
             S[self.cid_to_idx[c],self.rid_to_idx[(r,d)]] = s
 
         return S
-        
-    def expand(self,seedSet,algorithm='naive'):
+
+    def expand(self, seedSet, algorithm="naive"):
         # constructre network from skinny table and create matricies for NE algorithm
         # if (self.rid_to_idx is None) or (self.idx_to_rid is None):
         self.rid_to_idx, self.idx_to_rid = self.create_reaction_dicts()
@@ -334,8 +333,8 @@ class GlobalMetabolicNetwork:
         # if self.S is None:
         self.S = self.create_S_from_irreversible_network()
         x0 = self.initialize_metabolite_vector(seedSet)
-        R = (self.S < 0)*1
-        P = (self.S > 0)*1
+        R = (self.S < 0) * 1
+        P = (self.S > 0) * 1
         b = sum(R)
 
         # sparsefy data
@@ -378,10 +377,10 @@ class GlobalMetabolicNetwork:
             compounds_list.append(sub_compounds)
 
         reactions_list = []
-        for sub_x in x_list:
-            if sub_x.toarray().sum() > 0:
-                cid_sub_x = np.nonzero(sub_x.toarray().T[0])[0]
-                sub_reactions = [self.id_to_cid[i] for i in cid_sub_x]
+        for sub_y in y_list:
+            if sub_y.toarray().sum() > 0:
+                rid_sub_y = np.nonzero(sub_y.toarray().T[0])[0]
+                sub_reactions = [self.idx_to_rid[i] for i in rid_sub_y]
             else:
                 sub_reactions = []
             reactions_list.append(sub_reactions)
