@@ -385,4 +385,9 @@ class GlobalMetabolicNetwork:
                 sub_reactions = []
             reactions_list.append(sub_reactions)
 
+        if compounds_list[-1] != compounds:
+            raise Exception("Compound/compound mismatch")
+        if reactions_list[-1] != reactions:
+            raise Exception("Reaction/reaction mismatch")
+
         return compounds, reactions, compounds_list, reactions_list
