@@ -1,7 +1,7 @@
 import networkExpansionPy.lib as ne
 
 # from scipy.sparse import csr_matrix
-# import numpy as np
+import numpy as np
 # from random import sample
 import pandas as pd
 
@@ -42,4 +42,6 @@ len(metabolism.network.cid.unique().tolist())
 cpds = pd.read_csv("../networkExpansionPy/assets/compounds/seeds.csv")
 cpds["CID"] = cpds["CID"].apply(lambda x: x.strip())
 seedset = set(cpds["CID"].tolist())
-ne_cpds, ne_rxns = metabolism.expand(seedset)
+ne_cpds, ne_rxns, ne_cpds_list, ne_rxns_list = metabolism.expand(seedset)
+
+print('Total compounds: {} Total reactions: {}'.format(np.size(ne_cpds), np.size(ne_rxns)/2))

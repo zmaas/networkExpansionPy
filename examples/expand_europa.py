@@ -67,21 +67,22 @@ rxns_count_stepratios = list(
 rxns_count_logquots = list(
     np.log2(np.array(rxns_count_list[1:]) / np.array(rxns_count_list[:-1]))
 )
-# Plot the growth over time using the above data
-fig, ax = plt.subplots(nrows=2, ncols=2)
-fig.suptitle("Per-Iteration Growth on Europa Expansion Set")
-ax[0, 0].plot(rxns_count_list)
-ax[0, 0].set_xlabel("Expansion Iteration")
-ax[0, 0].set_ylabel("Total Reactions")
-ax[0, 1].plot(rxns_count_differences)
-ax[0, 1].set_xlabel("Expansion Iteration")
-ax[0, 1].set_ylabel("Reactions Added")
-ax[1, 0].plot(rxns_count_stepratios)
-ax[1, 0].set_xlabel("Expansion Iteration")
-ax[1, 0].set_ylabel("Reactions Added / Previous Network Size")
-ax[1, 1].plot(rxns_count_logquots)
-ax[1, 1].set_xlabel("Expansion Iteration")
-ax[1, 1].set_ylabel("Log2(Relative Size Increase)")
+
+# # Plot the growth over time using the above data
+# fig, ax = plt.subplots(nrows=2, ncols=2)
+# fig.suptitle("Per-Iteration Growth on Europa Expansion Set")
+# ax[0, 0].plot(rxns_count_list)
+# ax[0, 0].set_xlabel("Expansion Iteration")
+# ax[0, 0].set_ylabel("Total Reactions")
+# ax[0, 1].plot(rxns_count_differences)
+# ax[0, 1].set_xlabel("Expansion Iteration")
+# ax[0, 1].set_ylabel("Reactions Added")
+# ax[1, 0].plot(rxns_count_stepratios)
+# ax[1, 0].set_xlabel("Expansion Iteration")
+# ax[1, 0].set_ylabel("Reactions Added / Previous Network Size")
+# ax[1, 1].plot(rxns_count_logquots)
+# ax[1, 1].set_xlabel("Expansion Iteration")
+# ax[1, 1].set_ylabel("Log2(Relative Size Increase)")
 
 
 # Read in data for name conversion
@@ -120,3 +121,6 @@ for curr_rxns in ne_rxns_list:
 # G = nx.Graph()
 # G.add_edges_from(edges_renamed)
 # nx.drawing.nx_agraph.write_dot(G, "/hdd/minimal.dot")
+    
+print('Total compounds: {} Total reactions: {}'.format(np.size(ne_cpds), np.size(ne_rxns)/2))
+
