@@ -150,14 +150,20 @@ def load_ecg_network(ecg):
 class GlobalMetabolicNetwork:
 
     # The init function gets called when a class object is initialized
-    # the function checks if a databse in json format is given, if not it loads
+    # the function checks whether or not to load the atlas or kegg database with 
+    # the kegg database as default.
+    # The function checks if a databse in json format is given, if not it loads
     # the /KEGG/network_full.csv' as default. It also loads /compounds/cpds.txt'
     # for the compounds and /reaction_free_energy/kegg_reactions_CC_ph7.0.csv'
     # for the thermodynamics
-    def __init__(self,ecg_json=None):
+    def __init__(self,atlas=None, ecg_json=None):
 
         if ecg_json == None:
-            network = pd.read_csv(asset_path + '/KEGG/network_full.csv')
+            if atlas == None:
+                network = pd.read_csv(asset_path + '/KEGG/network_full.csv')
+            else:
+                network = pd.read_csv(asset_path + '/KEGG/atlas_network_full.csv')
+                print('Running with ATLAS database')
             cpds = pd.read_csv(asset_path +'/compounds/cpds.txt',sep='\t')
             thermo = pd.read_csv(asset_path +'/reaction_free_energy/kegg_reactions_CC_ph7.0.csv',sep=',')
             self.network = network
@@ -172,7 +178,7 @@ class GlobalMetabolicNetwork:
             self.network = network
             self.ecg = ecg
             self.consistent_rxns = consistent_rxns
-            self.compounds = pd.DataFrame(self.network["cid"].unique(),columns=["cid"]) ## Only includes compounds with reactions
+            self.compounds = pd.DataFrame(self.network["cid"].unique(),columns=["cid"]) ## Only iitncludes compounds with reactions
 
         # Set attributes of the class (Temp is initialized to 25C)
         self.temperature = 25
