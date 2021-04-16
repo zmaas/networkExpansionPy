@@ -1,7 +1,23 @@
 from webweb import Web
 
-# make a list of unweighted edges
-edge_list = [[1, 2], [2, 3], [3, 4]]
+web = Web(
+    adjacency=[[0, 1], [1, 2]],
+    display={
+        'nodes' : {
+            0 : {
+                'name' : 'Huberg',
+            },
+            1 : {
+                'name' : 'Pierot',
+            },
+            2 : {
+                'name' : 'Slartibertfast',
+            },
+            3 : {
+                'name' : 'LOL',
+            },
+        },
+    },
+)
 
-# instantiate webweb and show the result
-Web(edge_list).show()
+web.show()

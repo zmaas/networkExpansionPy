@@ -399,3 +399,17 @@ class GlobalMetabolicNetwork:
         self.convertToIrreversible()
         # Remove infeasible reactions
         self.pruneThermodynamicallyInfeasibleReactions(keepnan)
+
+    def oxygen_indepentend(self):
+        oxygen_dependent_rxns = (
+            self.network[self.network.cid.isin(["C00007"])]
+            .rn.unique()
+            .tolist()
+        )
+        o2_independent_rxns = [
+            x
+            for x in self.network.rn.unique().tolist()
+            if x not in oxygen_dependent_rxns
+        ]
+        # only keep anaerobic reactions
+        self.subnetwork(o2_independent_rxns)
