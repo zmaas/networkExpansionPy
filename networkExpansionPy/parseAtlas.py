@@ -46,7 +46,7 @@ out_file = "../networkExpansionPy/assets/iqbio/atlas_network_full.csv"
 
 def get_rxn_pairs(in_file= "../networkExpansionPy/assets/iqbio/atlas_full.csv", init= 1 ):
     all_rxns = get_column(in_file, [0, 2])
-    identify_compounds(all_rxns, init)
+    return identify_compounds(all_rxns, init)
 
 def get_column(file_name, result_column=1):
 

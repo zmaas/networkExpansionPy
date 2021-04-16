@@ -85,10 +85,20 @@ for curr_rxns in ne_rxns_list:
         try:
             edges.update(rxn_pairs[rxn[0]])
         except KeyError:
-            pass
-            # print(f"Reaction {rxn[0]} not found")
+            print(f"Lookup error on {rxn[0]}")
     # Convert compounds to their real names (not CXXXXX)
-    edges_renamed = [(cpd_dict[x], cpd_dict[y]) for x, y in edges]
+    edges_renamed = []
+    for x, y in edges:
+        try:
+            x_name = cpd_dict[x]
+        except KeyError:
+            x_name = x
+        try:
+            y_name = cpd_dict[y]
+        except KeyError:
+            y_name = y
+        edges_renamed.append((x_name,y_name))
+
     web.networks.webweb.add_layer(adjacency=edges_renamed)
 # web.show()
 
