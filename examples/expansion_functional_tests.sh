@@ -15,7 +15,8 @@ assert_in_stdout "example"
 
 run test_minimal python expand_minimal.py
 assert_exit_code 0
-assert_in_stdout "Total compounds: 29 Total reactions: 54"
+assert_in_stdout "Compounds: 10
+Reactions: 6"
 
 run test_metals python expand_metals.py
 assert_exit_code 0
