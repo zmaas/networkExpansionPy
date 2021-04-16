@@ -469,6 +469,7 @@ class GlobalMetabolicNetwork:
 
         return compounds, reactions, compounds_list, reactions_list
 
+    # Function to prune the network initially  
     def init_pruning(self,pH='7.0', ub=1e-1, lb=1e-6, keepnan=False):
         self.pruneUnbalancedReactions()
         # Remove reactions that unrealistically produce new elements
@@ -482,6 +483,7 @@ class GlobalMetabolicNetwork:
         # Remove infeasible reactions
         self.pruneThermodynamicallyInfeasibleReactions(keepnan)
 
+    # Function to delete all oxygen dependent reactions
     def oxygen_indepentend(self):
         oxygen_dependent_rxns = (
             self.network[self.network.cid.isin(["C00007"])]
