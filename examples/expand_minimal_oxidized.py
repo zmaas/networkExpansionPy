@@ -9,7 +9,7 @@ metabolism.init_pruning()
 metabolism.oxygen_indepentend()
 
 # define seed compounds
-cpds = pd.read_csv("../networkExpansionPy/assets/iqbio/minimal_reduced.csv")
+cpds = pd.read_csv("../networkExpansionPy/assets/compounds/minimal_oxidized.csv")
 cpds["CID"] = cpds["CID"].apply(lambda x: x.strip())
 seedset = set(cpds["CID"].tolist())
 
