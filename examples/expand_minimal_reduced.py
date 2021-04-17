@@ -59,7 +59,20 @@ nodes_dct = {nodes_renamed[i]: i for i in range(0, len(nodes_renamed))}
 #print("----------------------------------------------------------------------")
 #print(edges_renamed)
 
-web = Web(adjacency=list(edges_renamed), nodes=nodes_dct, title='Metabolism Network')
+web = Web(adjacency=list(edges_renamed), nodes=nodes_dct, title='Metabolism Network: Minimal Reduced')
 web.display.sizeBy = 'degree'
 web.display.colorBy = 'degree'
 web.show()
+
+# Code to identify seedset compounds that were not used in any reaction
+edges_set = set()
+for x,y in edges_renamed:
+    edges_set.add(x)
+    edges_set.add(y)
+
+list_of_unused = list()
+for k in nodes_renamed:
+    if k not in edges_set:
+        list_of_unused.append(k)
+print("Unused seedset compounds:")
+print(list_of_unused)
