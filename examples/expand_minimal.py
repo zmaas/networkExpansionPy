@@ -19,14 +19,14 @@ ne_cpds, ne_rxns, ne_cpds_list, ne_rxns_list = metabolism.expand(seedset)
 print("----------------------------------------------------------------------")
 print("Compounds: " + str(len(ne_cpds)))
 print("Reactions: " + str(len(ne_rxns)))
-
 print("----------------------------------------------------------------------")
+
 #print(ne_cpds)
 #print("----------------------------------------------------------------------")
 #print(ne_rxns)
 #print("----------------------------------------------------------------------")
 
-# plotting
+# plotting of the results using webweb
 rxn_pairs, _ = pk.get_rxn_pairs()
 
 edges = set()
@@ -76,3 +76,10 @@ for k in nodes_renamed:
         list_of_unused.append(k)
 print("Unused seedset compounds:")
 print(list_of_unused)
+
+# Code to create file for upload to KEGG
+usr_data_kegg = open("../networkExpansionPy/assets/iqbio/MinimalCompounds.txt", "w")
+for c in ne_cpds:
+    usr_data_kegg.write(c + '\n')
+
+usr_data_kegg.close()

@@ -76,3 +76,10 @@ for k in nodes_renamed:
         list_of_unused.append(k)
 print("Unused seedset compounds:")
 print(list_of_unused)
+
+# Code to create file for upload to KEGG
+usr_data_kegg = open("../networkExpansionPy/assets/iqbio/MinimalReduced.txt", "w")
+for c in ne_cpds:
+    usr_data_kegg.write(c + '\n')
+
+usr_data_kegg.close()
