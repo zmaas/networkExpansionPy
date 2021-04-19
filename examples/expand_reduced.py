@@ -6,7 +6,7 @@ from webweb import Web
 # initializing network and pruning
 metabolism = ne.GlobalMetabolicNetwork()
 metabolism.init_pruning()
-metabolism.oxygen_indepentend()
+metabolism.oxygen_independent()
 
 # define seed compounds
 cpds = pd.read_csv("../networkExpansionPy/assets/compounds/seeds_reduced.csv")
@@ -26,21 +26,10 @@ print("----------------------------------------------------------------------")
 #print(ne_rxns)
 #print("----------------------------------------------------------------------")
 
-# plotting
-rxn_pairs, _ = pk.get_rxn_pairs()
-
-edges = set()
-
-for rxn in ne_rxns:
-    try:
-        edges.update(rxn_pairs[rxn[0]])
-    except KeyError:
-        print(f"Reaction {rxn[0]} not found")
-
-#print("----------------------------------------------------------------------")
-#print(edges)
-
-with open("../networkExpansionPy/assets/iqbio/compounds.csv") as cpds_file_handle:
+# Read in data for name conversion
+with open(
+    "../networkExpansionPy/assets/iqbio/compounds.csv"
+) as cpds_file_handle:
     lines = list(cpds_file_handle.readlines())
     cpd_dict = {
         cpd: name
@@ -48,18 +37,28 @@ with open("../networkExpansionPy/assets/iqbio/compounds.csv") as cpds_file_handl
             line.strip("cpd:").strip().split(maxsplit=1) for line in lines
         ]
     }
+    
+# Get dict of product/reactant pairs associated with each reaction
+rxn_pairs, _ = pk.get_rxn_pairs()
 
+# Convert reactions to compounds
+edges = set()
+# Look up every product/reactant pair for all reactions in current step
+for rxn in ne_rxns:
+    try:
+        edges.update(rxn_pairs[rxn[0]])
+    except KeyError:
+        print(f"Reaction {rxn[0]} not found")
+        
+# Convert compounds to their real names (not CXXXXX)
 edges_renamed = [(cpd_dict[x], cpd_dict[y]) for x, y in edges]
 nodes_renamed = [cpd_dict[x] for x in ne_cpds]
 nodes_dct = {nodes_renamed[i]: i for i in range(0, len(nodes_renamed))}
 
-#print("Nodes:")
-#print(nodes_dct)
-#print(type(nodes_dct))
-#print("----------------------------------------------------------------------")
-#print(edges_renamed)
+# Add a later to our webweb object
+web = Web(adjacency=list(edges_renamed), nodes=nodes_dct, title='Metabolism Network: Europa Oxidized')
 
-web = Web(adjacency=list(edges_renamed), nodes=nodes_dct, title='Metabolism Network: Europa Reduced')
+# Generate the webweb object for interactive visualization
 web.display.sizeBy = 'degree'
 web.display.colorBy = 'degree'
 web.show()
@@ -78,8 +77,9 @@ print("Unused seedset compounds:")
 print(list_of_unused)
 
 # Code to create file for upload to KEGG
-usr_data_kegg = open("../networkExpansionPy/assets/iqbio/Reduced.txt", "w")
+usr_data_kegg = open("../networkExpansionPy/assets/iqbio/Europa_Oxidized.txt", "w")
 for c in ne_cpds:
     usr_data_kegg.write(c + '\n')
-
+for r, direction in ne_rxns:
+    usr_data_kegg.write(r + '\n')
 usr_data_kegg.close()
