@@ -482,18 +482,23 @@ class GlobalMetabolicNetwork:
         return compounds, reactions, compounds_list, reactions_list
 
     # Function to prune the network initially  
-    def init_pruning(self,pH='7.0', ub=1e-1, lb=1e-6, keepnan=False):
-        self.pruneUnbalancedReactions()
-        # Remove reactions that unrealistically produce new elements
-        self.pruneInconsistentReactions()
-        # Look at a pH of 7 (must be between 5 and 9, 0.5 increments)
-        self.set_ph(pH)
-        # Upper and lower metabolite bounds
-        self.setMetaboliteBounds(ub, lb)
-        # Irreversible required for thermodynamic considerations
-        self.convertToIrreversible()
-        # Remove infeasible reactions
-        self.pruneThermodynamicallyInfeasibleReactions(keepnan)
+    def init_pruning(self,pH='7.0', ub=1e-1, lb=1e-6, keepnan=False, atlas=None):
+        if atlas == None:
+            self.pruneUnbalancedReactions()
+            # Remove reactions that unrealistically produce new elements
+            self.pruneInconsistentReactions()
+            # Look at a pH of 7 (must be between 5 and 9, 0.5 increments)
+            self.set_ph(pH)
+            # Upper and lower metabolite bounds
+            self.setMetaboliteBounds(ub, lb)
+            # Irreversible required for thermodynamic considerations
+            self.convertToIrreversible()
+            # Remove infeasible reactions
+            self.pruneThermodynamicallyInfeasibleReactions(keepnan)
+        else:
+            # Irreversible required for thermodynamic considerations
+            self.convertToIrreversible()
+
 
     # Function to delete all oxygen dependent reactions
     def oxygen_indepentend(self):
