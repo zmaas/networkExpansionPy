@@ -1,6 +1,9 @@
-# Running Network Expansion Code
+# Network Expansion Code Guide
 
 <!-- Formatting: One sentence per line to make git diffing easier -->
+## Running Network Expansion Code
+
+TODO: UPDATE with current code
 
 This is a quick guide on how to use the network expansion code in this repository to explore the expansion of your own seed set.
 We'll explore how to construct a metabolic network, establish constraints, and then run a network expansion.
@@ -83,9 +86,18 @@ This will return 4 variables:
 - A list of lists of compounds at each step in the expansion
 - A list of lists of reactions at each step in the expansion
 
+Additionally a .txt file will be created of compound and reaction IDs.
+
 These can then be used for later analysis and visualization.
 
-To check for functionality of the example expansions included, run the following tests:
+## Visualization
+
+TODO: add info on WebWeb and KEGG visualization steps with examples
+
+
+## Functional Test
+
+To check for functionality of the example expansions included, run the following test:
 ```
 bash expansion_functional_tests.sh
 ```
