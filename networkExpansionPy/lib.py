@@ -161,10 +161,10 @@ class GlobalMetabolicNetwork:
     # the /KEGG/network_full.csv' as default. It also loads /compounds/cpds.txt'
     # for the compounds and /reaction_free_energy/kegg_reactions_CC_ph7.0.csv'
     # for the thermodynamics
-    def __init__(self,atlas=None, ecg_json=None):
+    def __init__(self,atlas=False, ecg_json=None):
 
         if ecg_json == None:
-            if atlas == None:
+            if atlas == False:
                 network = pd.read_csv(asset_path + '/KEGG/network_full.csv')
             else:
                 network = pd.read_csv(asset_path + '/KEGG/atlas_network_full.csv')
@@ -183,7 +183,7 @@ class GlobalMetabolicNetwork:
             self.network = network
             self.ecg = ecg
             self.consistent_rxns = consistent_rxns
-            self.compounds = pd.DataFrame(self.network["cid"].unique(),columns=["cid"]) ## Only iitncludes compounds with reactions
+            self.compounds = pd.DataFrame(self.network["cid"].unique(),columns=["cid"]) ## Only includes compounds with reactions
 
         # Set attributes of the class (Temp is initialized to 25C)
         self.temperature = 25
@@ -481,8 +481,8 @@ class GlobalMetabolicNetwork:
         return compounds, reactions, compounds_list, reactions_list
 
     # Function to prune the network initially  
-    def init_pruning(self,pH='7.0', ub=1e-1, lb=1e-6, keepnan=False, atlas=None):
-        if atlas == None:
+    def init_pruning(self, atlas=False, pH='7.0', ub=1e-1, lb=1e-6, keepnan=False):
+        if atlas == False:
             self.pruneUnbalancedReactions()
             # Remove reactions that unrealistically produce new elements
             self.pruneInconsistentReactions()
