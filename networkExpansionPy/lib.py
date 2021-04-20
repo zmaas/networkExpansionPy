@@ -1,4 +1,3 @@
-# Class scipy.sparse.csr_matrix
 # (https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_matrix.html#scipy.sparse.csr_matrix)
 # A special format for matricies that mostly contaions 0s
 # Sparse data are a data sets that mostly contains 0s
@@ -501,7 +500,7 @@ class GlobalMetabolicNetwork:
 
 
     # Function to delete all oxygen dependent reactions
-    def oxygen_indepentend(self):
+    def oxygen_independent(self):
         oxygen_dependent_rxns = (
             self.network[self.network.cid.isin(["C00007"])]
             .rn.unique()

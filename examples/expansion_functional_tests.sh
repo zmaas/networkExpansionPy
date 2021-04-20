@@ -24,4 +24,5 @@ assert_in_stdout "Total compounds: 56 Total reactions: 68"
 
 run test_europa python expand_europa.py
 assert_exit_code 0
-assert_in_stdout "Total compounds: 32 Total reactions: 34"
+assert_in_stdout "Compounds: 34
+Reactions: 36"

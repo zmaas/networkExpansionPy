@@ -7,40 +7,10 @@ import pandas as pd  # Data frames
 import networkx as nx  # Graph algorithms/data structures
 from webweb import Web  # Graph plotting
 
-# Initial metabolic network loading and pruning
-# Construct network
+# initializing network and pruning
 metabolism = ne.GlobalMetabolicNetwork()
-# Remove things with nonsense stoichiometries
-metabolism.pruneUnbalancedReactions()
-# Remove reactions that unrealistically produce new elements
-metabolism.pruneInconsistentReactions()
-# Look at a pH of 7 (must be between 5 and 9, 0.5 increments)
-metabolism.set_ph(7.0)
-# Upper and lower metabolite bounds
-metabolism.setMetaboliteBounds(ub=1e-1, lb=1e-6)
-# Irreversible required for thermodynamic considerations
-metabolism.convertToIrreversible()
-# Remove infeasible reactions
-metabolism.pruneThermodynamicallyInfeasibleReactions(keepnan=False)
-
-# Filter oxygen dependent reactions
-# Shouldn't have an effect if O2 not present in seed?
-filter_o2 = True
-if filter_o2:
-    # Find reactions requiring oxygen
-    oxygen_dependent_rxns = (
-        metabolism.network[metabolism.network.cid.isin(["C00007"])]
-        .rn.unique()
-        .tolist()
-    )
-    # Remove oxygen dependent reactions
-    o2_independent_rxns = [
-        x
-        for x in metabolism.network.rn.unique().tolist()
-        if x not in oxygen_dependent_rxns
-    ]
-    # Apply the subset to our network
-    metabolism.subnetwork(o2_independent_rxns)
+metabolism.init_pruning()
+metabolism.oxygen_independent()
 
 # Read in the sead compounds and parse them
 cpds = pd.read_csv("../networkExpansionPy/assets/compounds/seeds_europa.csv")
@@ -50,8 +20,12 @@ seedset = set(cpds["CID"].tolist())
 
 # Run metabolic expansion algorithm
 ne_cpds, ne_rxns, ne_cpds_list, ne_rxns_list = metabolism.expand(seedset)
-# Get dict of product/reactant pairs associated with each reaction
-rxn_pairs, _ = pk.get_rxn_pairs()  # FIXME may be redundant with Josh's
+
+print("----------------------------------------------------------------------")
+print("Compounds: " + str(len(ne_cpds)))
+print("Reactions: " + str(len(ne_rxns)))
+
+print("----------------------------------------------------------------------")
 
 # Get the number of new compounds at each step
 rxns_count_list = [len(x) for x in ne_rxns_list]
@@ -96,31 +70,56 @@ with open(
             line.strip("cpd:").strip().split(maxsplit=1) for line in lines
         ]
     }
+    
+# Get dict of product/reactant pairs associated with each reaction
+rxn_pairs, _ = pk.get_rxn_pairs()
 
-# Build webweb object
-web = Web(title="Iterative Expansion from Minimal Seed Set")
-# Grab the reactions and compound/compound pairs in each reaction
-# FIXME the error we're getting can be fixed using the network df object, might be slower
-for curr_rxns in ne_rxns_list:
-    # Convert reactions to compounds
-    edges = set()
-    # Look up every product/reactant pair for all reactions in current step
-    for rxn in curr_rxns:
-        try:
-            edges.update(rxn_pairs[rxn[0]])
-        except KeyError:
-            print(f"Reaction {rxn[0]} not found")
-    # Convert compounds to their real names (not CXXXXX)
-    edges_renamed = [(cpd_dict[x], cpd_dict[y]) for x, y in edges]
-    # Add a later to our webweb object
-    web.networks.webweb.add_layer(adjacency=edges_renamed)
+# Convert reactions to compounds
+edges = set()
+# Look up every product/reactant pair for all reactions in current step
+for rxn in ne_rxns:
+    try:
+        edges.update(rxn_pairs[rxn[0]])
+    except KeyError:
+        print(f"Reaction {rxn[0]} not found")
+        
+# Convert compounds to their real names (not CXXXXX)
+edges_renamed = [(cpd_dict[x], cpd_dict[y]) for x, y in edges]
+nodes_renamed = [cpd_dict[x] for x in ne_cpds]
+nodes_dct = {nodes_renamed[i]: i for i in range(0, len(nodes_renamed))}
+
+# Add a later to our webweb object
+web = Web(adjacency=list(edges_renamed), nodes=nodes_dct, title='Metabolism Network: Europa')
+
 # Generate the webweb object for interactive visualization
-# web.show()
+web.display.sizeBy = 'degree'
+web.display.colorBy = 'degree'
+web.show()
+
 
 # Basic graph structure for exploring data
 # G = nx.Graph()
 # G.add_edges_from(edges_renamed)
 # nx.drawing.nx_agraph.write_dot(G, "/hdd/minimal.dot")
-    
-print('Total compounds: {} Total reactions: {}'.format(np.size(ne_cpds), np.size(ne_rxns)/2))
 
+# Code to identify seedset compounds that were not used in any reaction
+edges_set = set()
+for x,y in edges_renamed:
+    edges_set.add(x)
+    edges_set.add(y)
+
+list_of_unused = list()
+for k in nodes_renamed:
+    if k not in edges_set:
+        list_of_unused.append(k)
+print("Unused seedset compounds:")
+print(list_of_unused)
+
+# Code to create file for upload to KEGG
+usr_data_kegg = open("../networkExpansionPy/assets/iqbio/Europa.txt", "w")
+for c in ne_cpds:
+    usr_data_kegg.write(c + '\n')
+for r, direction in ne_rxns:
+    usr_data_kegg.write(r + '\n')
+
+usr_data_kegg.close()

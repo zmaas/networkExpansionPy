@@ -1,6 +1,7 @@
 CID,Name
 C00037,Glycine
 C00041,L-Alanine
+C00067,Formaldehyde
 C00132,Methanol
 C01438,Methane
 C00086,Urea
@@ -10,9 +11,11 @@ C00011,Carbon dioxide
 C14818,Ferrous ion
 C00282,Hydrogen
 C00001,Water
+C00027,Hydrogen peroxide
 C00283,Hydrogen sulfide
 C00059,Sulfuric acid
 C00009,Phosphate
+C00013,Pyrophosphate
 C00288,Bicarbonate
 C00058,Formate
 C00305,Magnesium cation
