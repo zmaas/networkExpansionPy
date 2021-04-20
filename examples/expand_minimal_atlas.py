@@ -11,7 +11,9 @@ from webweb import Web
 atlas = True
 
 # initializing network and pruning
+# if atlas = True, this step will initalize with the atlas network database
 metabolism = ne.GlobalMetabolicNetwork(atlas)
+# if atlas = True, this step will skip all pruning and only convert to irreversible 
 metabolism.init_pruning(atlas)
 
 # Read in the seed compounds and parse them
@@ -22,6 +24,7 @@ seedset = set(cpds["CID"].tolist())
 # Run metabolic expansion
 ne_cpds, ne_rxns, ne_cpds_list, ne_rxns_list = metabolism.expand(seedset)
 
+# This designates which network reaction and compound IDs to associate with
 if atlas == False:
     # Get dict of product/reactant pairs associated with each reaction
     rxn_pairs, _ = pa.get_rxn_pairs()  # FIXME may be redundant with Josh's
