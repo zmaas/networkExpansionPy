@@ -40,7 +40,8 @@ for rxn in ne_rxns:
 #print("----------------------------------------------------------------------")
 #print(edges)
 
-with open("../networkExpansionPy/assets/iqbio/compounds.csv") as cpds_file_handle:
+#with open("../networkExpansionPy/assets/iqbio/compounds.csv") as cpds_file_handle:
+with open("../networkExpansionPy/assets/iqbio/workaround.csv") as cpds_file_handle:
     lines = list(cpds_file_handle.readlines())
     cpd_dict = {
         cpd: name

@@ -13,6 +13,9 @@ cpds = pd.read_csv("../networkExpansionPy/assets/compounds/seeds_reduced.csv")
 cpds["CID"] = cpds["CID"].apply(lambda x: x.strip())
 seedset = set(cpds["CID"].tolist())
 
+print("----------------------------------------------------------------------")
+print(seedset)
+
 # run network expansion
 ne_cpds, ne_rxns, ne_cpds_list, ne_rxns_list = metabolism.expand(seedset)
 
@@ -21,10 +24,10 @@ print("Compounds: " + str(len(ne_cpds)))
 print("Reactions: " + str(len(ne_rxns)))
 
 print("----------------------------------------------------------------------")
-#print(ne_cpds)
-#print("----------------------------------------------------------------------")
-#print(ne_rxns)
-#print("----------------------------------------------------------------------")
+print(ne_cpds)
+print("----------------------------------------------------------------------")
+print(ne_rxns)
+print("----------------------------------------------------------------------")
 
 # plotting
 rxn_pairs, _ = pk.get_rxn_pairs()
