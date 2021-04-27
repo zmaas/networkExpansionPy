@@ -40,7 +40,7 @@ with open(
             line.strip("cpd:").strip().split(maxsplit=1) for line in lines
         ]
     }
-    
+
 # Get dict of product/reactant pairs associated with each reaction
 rxn_pairs, _ = pk.get_rxn_pairs()
 
@@ -52,7 +52,7 @@ for rxn in ne_rxns:
         edges.update(rxn_pairs[rxn[0]])
     except KeyError:
         print(f"Reaction {rxn[0]} not found")
-        
+
 # Convert compounds to their real names (not CXXXXX)
 edges_renamed = [(cpd_dict[x], cpd_dict[y]) for x, y in edges]
 nodes_renamed = [cpd_dict[x] for x in ne_cpds]
