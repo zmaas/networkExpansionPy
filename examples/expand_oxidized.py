@@ -33,7 +33,7 @@ with open(
             line.strip("cpd:").strip().split(maxsplit=1) for line in lines
         ]
     }
-    
+
 # Get dict of product/reactant pairs associated with each reaction
 rxn_pairs, _ = pk.get_rxn_pairs()
 
@@ -45,7 +45,7 @@ for rxn in ne_rxns:
         edges.update(rxn_pairs[rxn[0]])
     except KeyError:
         print(f"Reaction {rxn[0]} not found")
-        
+
 # Convert compounds to their real names (not CXXXXX)
 edges_renamed = [(cpd_dict[x], cpd_dict[y]) for x, y in edges]
 nodes_renamed = [cpd_dict[x] for x in ne_cpds]
@@ -80,3 +80,17 @@ for r, direction in ne_rxns:
     usr_data_kegg.write(r + '\n')
 usr_data_kegg.close()
 
+# Code to compare to target set
+europa = ne_cpds
+# Read in the target compounds and parse them
+cpds = pd.read_csv("../networkExpansionPy/assets/iqbio/Target_Set.csv")
+# Normalize by removing whitespace, using pandas formatting
+cpds["CID"] = cpds["CID"].apply(lambda x: x.strip())
+target = cpds["CID"].tolist()
+
+set_europa = set(europa)
+set_target = set(target)
+
+print("-------------------------------")
+print(set_target.intersection(set_europa))
+print("-------------------------------")
