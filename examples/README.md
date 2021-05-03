@@ -3,8 +3,6 @@
 <!-- Formatting: One sentence per line to make git diffing easier -->
 ## Running Network Expansion Code
 
-TODO: UPDATE with current code
-
 This is a quick guide on how to use the network expansion code in this repository to explore the expansion of your own seed set.
 We'll explore how to construct a metabolic network, establish constraints, and then run a network expansion.
 The first step is to load in the networkExpansionPy library:
