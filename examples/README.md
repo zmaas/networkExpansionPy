@@ -110,7 +110,7 @@ ax[1, 1].set_ylabel("Log2(Relative Size Increase)")
 
 ###### WebWeb Interactive Display
 
-<center><img src="readme_images/webweb.png" width="600"/></center>
+<center><img src="readme_images/webweb.PNG" width="600"/></center>
 
 WebWeb [(developed by Dan Larrenmore)](https://webwebpage.github.io/) is an interactive network based package within which the resulting expanded network can be generated to explore the connectivity of reactions and importance of compounds. 
 
@@ -168,7 +168,7 @@ There are additonal pathway types to explore on the top left and reactions and c
 More detailed information on each reaction and compound in your network can be accessed through inputting your network in [KEGG Mapper](https://www.genome.jp/kegg/tool/map_pathway1.html)
 
 
-##ATLAS Alternative Database
+## ATLAS Alternative Database
 [ATLAS](https://lcsb-databases.epfl.ch/pathways/atlas/) is a database of potentially feasibly biological reactions developed by the [Laboratory of Computational Systems of Biotechnology](https://www.epfl.ch/labs/lcsb/).
 An example file `expand_minimal_atlas.py` demonstrates how to run your network expanion using ATLAS instead of the default database.
 Most notably the pruning steps must be skipped since the current version of the code relies on KEGG-specific reaction IDs. These steps may be skipped by the following:
