@@ -8,8 +8,7 @@ The package is built from algorithms described in the following papers:
 
 [Goldford J.E. et al, Environmental boundary conditions for the origin of life converge to an organo-sulfur metabolism. Nature Ecol Evo 3,12 1715-1724, November 11,](https://pubmed.ncbi.nlm.nih.gov/31712697/)
 
-
-For a guide on the use of this package see the Examples folder README.md
+__For a guide on the use of this package see the README.md file in the [examples](./examples "link to examples folder")__
 
 ## Installation
 
