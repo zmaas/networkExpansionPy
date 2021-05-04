@@ -4,6 +4,7 @@
 # CSR = Compressed Sparse Row
 # Tutorial: https://www.w3schools.com/python/scipy_sparse_data.asp
 from scipy.sparse import csr_matrix
+from scipy.sparse import dok_matrix
 
 # Python library to work with arrays
 # https://www.w3schools.com/python/numpy_intro.asp
@@ -26,6 +27,8 @@ import json
 # sometimes real copies are necessary to edit one copy without changing the other
 from copy import copy, deepcopy
 
+# Progress bars
+from tqdm import tqdm
 
 # Define the asset path
 # The first line gets the path of this file itself and splits the path into head and tail.
@@ -40,9 +43,10 @@ def netExp(R, P, x, b):
     k = np.sum(x)
     k0 = 0
     n_reactions = np.size(R, 1)
-    y = csr_matrix(np.zeros(n_reactions))
+    y = csr_matrix((n_reactions))
     x_list = [x]
     y_list = [y]
+    pbar = tqdm(desc="Network Expansion")
     while k > k0:
         k0 = np.sum(x)
         y = np.dot(R.transpose(), x) == b
@@ -53,6 +57,8 @@ def netExp(R, P, x, b):
         k = np.sum(x)
         x_list.append(x)
         y_list.append(y)
+        pbar.update(1)
+    pbar.close()
     return x, y, x_list, y_list
 
 # Algorithm that runs the network expansion, here the stopping criteria is not only that no new compounds are added,
@@ -149,14 +155,20 @@ def load_ecg_network(ecg):
 class GlobalMetabolicNetwork:
 
     # The init function gets called when a class object is initialized
-    # the function checks if a databse in json format is given, if not it loads
+    # the function checks whether or not to load the atlas or kegg database with 
+    # the kegg database as default.
+    # The function checks if a databse in json format is given, if not it loads
     # the /KEGG/network_full.csv' as default. It also loads /compounds/cpds.txt'
     # for the compounds and /reaction_free_energy/kegg_reactions_CC_ph7.0.csv'
     # for the thermodynamics
-    def __init__(self,ecg_json=None):
+    def __init__(self,atlas=False, ecg_json=None):
 
         if ecg_json == None:
-            network = pd.read_csv(asset_path + '/KEGG/network_full.csv')
+            if atlas == False:
+                network = pd.read_csv(asset_path + '/KEGG/network_full.csv')
+            else:
+                network = pd.read_csv(asset_path + '/KEGG/atlas_network_full.csv')
+                print('Running with ATLAS database')
             cpds = pd.read_csv(asset_path +'/compounds/cpds.txt',sep='\t')
             thermo = pd.read_csv(asset_path +'/reaction_free_energy/kegg_reactions_CC_ph7.0.csv',sep=',')
             self.network = network
@@ -393,12 +405,12 @@ class GlobalMetabolicNetwork:
     # direction, and stoichiometrie of a metabolite
     def create_S_from_irreversible_network(self):
 
-       S = np.zeros([len(self.cid_to_idx),len(self.rid_to_idx)])
+       S = dok_matrix((len(self.cid_to_idx),len(self.rid_to_idx)))
 
-       for c,r,d,s in zip(self.network["cid"],self.network["rn"],self.network["direction"],self.network["s"]):
+       for c,r,d,s in tqdm(zip(self.network["cid"],self.network["rn"],self.network["direction"],self.network["s"]), desc="Converting to Irreversible", total=len(self.network)):
            S[self.cid_to_idx[c],self.rid_to_idx[(r,d)]] = s
 
-       return S
+       return S.tocsr()
 
     # The network expanation algorithm that utilizes the netExp() function at the beginng of the
     # library. The function's inputs are the seedSet and the algorithm specification, specifying
@@ -469,18 +481,23 @@ class GlobalMetabolicNetwork:
         return compounds, reactions, compounds_list, reactions_list
 
     # Function to prune the network initially  
-    def init_pruning(self,pH='7.0', ub=1e-1, lb=1e-6, keepnan=False):
-        self.pruneUnbalancedReactions()
-        # Remove reactions that unrealistically produce new elements
-        self.pruneInconsistentReactions()
-        # Look at a pH of 7 (must be between 5 and 9, 0.5 increments)
-        self.set_ph(pH)
-        # Upper and lower metabolite bounds
-        self.setMetaboliteBounds(ub, lb)
-        # Irreversible required for thermodynamic considerations
-        self.convertToIrreversible()
-        # Remove infeasible reactions
-        self.pruneThermodynamicallyInfeasibleReactions(keepnan)
+    def init_pruning(self, atlas=False, pH='7.0', ub=1e-1, lb=1e-6, keepnan=False):
+        if atlas == False:
+            self.pruneUnbalancedReactions()
+            # Remove reactions that unrealistically produce new elements
+            self.pruneInconsistentReactions()
+            # Look at a pH of 7 (must be between 5 and 9, 0.5 increments)
+            self.set_ph(pH)
+            # Upper and lower metabolite bounds
+            self.setMetaboliteBounds(ub, lb)
+            # Irreversible required for thermodynamic considerations
+            self.convertToIrreversible()
+            # Remove infeasible reactions
+            self.pruneThermodynamicallyInfeasibleReactions(keepnan)
+        else:
+            # Irreversible required for thermodynamic considerations
+            self.convertToIrreversible()
+
 
     # Function to delete all oxygen dependent reactions
     def oxygen_independent(self):

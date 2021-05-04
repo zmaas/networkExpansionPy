@@ -1,12 +1,21 @@
 import networkExpansionPy.lib as ne
 import networkExpansionPy.parseKegg as pk
+import networkExpansionPy.parseAtlas as pa
 import pandas as pd
 from webweb import Web
+import matplotlib.pyplot as plt
+import numpy as np
 
 # initializing network and pruning
+<<<<<<< HEAD
+metabolism = ne.GlobalMetabolicNetwork(atlas=True)
+metabolism.init_pruning(atlas=True)
+metabolism.oxygen_indepentend()
+=======
 metabolism = ne.GlobalMetabolicNetwork()
 metabolism.init_pruning()
 metabolism.oxygen_independent()
+>>>>>>> c08ce662165628f2356d595d548130c8f46edb2a
 
 # define seed compounds
 cpds = pd.read_csv("../networkExpansionPy/assets/compounds/minimal_oxidized.csv")
@@ -23,12 +32,30 @@ print("Compounds: " + str(len(ne_cpds)))
 print("Reactions: " + str(len(ne_rxns)))
 
 print("----------------------------------------------------------------------")
+<<<<<<< HEAD
+#print(ne_cpds)
+#print("----------------------------------------------------------------------")
+#print(ne_rxns)
+#print("----------------------------------------------------------------------")
+
+# plotting
+rxn_pairs, _ = pa.get_rxn_pairs()
+
+edges = set()
+
+for rxn in ne_rxns:
+    try:
+        edges.update(rxn_pairs[rxn[0]])
+    except KeyError:
+        print(f"Reaction {rxn[0]} not found")
+
+#print("----------------------------------------------------------------------")
+#print(edges)
+=======
 print(ne_cpds)
 print("----------------------------------------------------------------------")
 print(ne_rxns)
 print("----------------------------------------------------------------------")
-
-# Read in data for name conversion
 with open(
     "../networkExpansionPy/assets/iqbio/compounds.csv"
 ) as cpds_file_handle:
@@ -79,9 +106,10 @@ print("Unused seedset compounds:")
 print(list_of_unused)
 
 # Code to create file for upload to KEGG
-usr_data_kegg = open("../networkExpansionPy/assets/iqbio/MinimalOxidized.txt", "w")
+usr_data_kegg = open("../networkExpansionPy/assets/iqbio/Europa_Minimal_Oxidized.txt", "w")
 for c in ne_cpds:
     usr_data_kegg.write(c + '\n')
 for r, direction in ne_rxns:
     usr_data_kegg.write(r + '\n')
+
 usr_data_kegg.close()
